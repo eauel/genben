@@ -35,9 +35,12 @@
 #  - git commit -a -m "post-release"
 #  - git push
 
-VERSION = '0.6.2'
+from setuptools import setup, find_packages
+
+VERSION = '0.1.0'
 
 DESCRIPTION = 'Python genomic benchmark suite'
+
 CLASSIFIERS = [
     'Development Status :: 1 - Planning',
     'Intended Audience :: Science/Research',
@@ -47,3 +50,21 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python',
 ]
+
+with open('README.md', 'r') as f:
+    long_description = f.read()
+
+setup(
+    name='genomics-benchmarks',
+    version=VERSION,
+    description=DESCRIPTION,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    url='https://github.com/ornl-oxford/genomics-benchmarks/',
+    license='MIT',
+    author='ornl-oxford',
+    packages=find_packages(),
+    classifiers=CLASSIFIERS,
+    install_requires=[],
+    scripts=['bin/genomics-benchmarks']
+)

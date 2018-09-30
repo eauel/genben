@@ -76,11 +76,3 @@ def _main():
     else:
         print("Error: Unexpected command specified. Exiting...")
         sys.exit(1)
-
-
-def main():
-    try:
-        _main()
-    except KeyboardInterrupt:
-        print("Program interrupted. Exiting...")
-        sys.exit(1)

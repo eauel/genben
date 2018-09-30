@@ -65,7 +65,25 @@ setup(
     license='MIT',
     author='ornl-oxford',
     packages=find_packages(),
+    data_files=[
+        ('doc', ['benchmark.conf.default'])
+    ],
     classifiers=CLASSIFIERS,
-    install_requires=[],
-    scripts=['bin/genomics-benchmarks']
+    install_requires=[
+        'matplotlib',
+        'numpy',
+        'pandas',
+        'scipy',
+        'dask',
+        'numcodecs',
+        'zarr',
+        'scikit-allel',
+        'perf',
+        'toolz'
+    ],
+    entry_points={
+        'console_scripts': [
+            'genomics-benchmarks = benchmark.__main__:main'
+        ]
+    }
 )

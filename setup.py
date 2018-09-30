@@ -42,11 +42,12 @@ VERSION = '0.1.0'
 DESCRIPTION = 'Python genomic benchmark suite'
 
 CLASSIFIERS = [
-    'Development Status :: 1 - Planning',
+    'Development Status :: 2 - Pre-Alpha',
     'Intended Audience :: Science/Research',
     'License :: OSI Approved :: MIT License',
     'Natural Language :: English',
     'Operating System :: OS Independent',
+    'Environment :: Console',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python',
 ]

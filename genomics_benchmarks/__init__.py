@@ -1,4 +1,4 @@
-from benchmark import cli
+from genomics_benchmarks import cli
 import sys
 
 

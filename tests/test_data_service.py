@@ -8,7 +8,7 @@ import shutil
 import zarr
 import numpy as np
 
-from benchmark import data_service, config
+from genomics_benchmarks import data_service, config
 
 
 class TestDataServices(unittest.TestCase):

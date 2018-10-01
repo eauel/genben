@@ -7,7 +7,7 @@ import time  # for benchmark timer
 import csv  # for writing results
 import logging
 import sys
-from benchmark import config, data_service
+from genomics_benchmarks import config, data_service
 
 
 def get_cli_arguments():

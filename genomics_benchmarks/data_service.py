@@ -16,7 +16,7 @@ import numpy as np
 import zarr
 import numcodecs
 from numcodecs import Blosc
-from benchmark import config
+from genomics_benchmarks import config
 
 import gzip
 import shutil

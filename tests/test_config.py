@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 import sys
 import os
-from benchmark import cli, config
+from genomics_benchmarks import cli, config
 
 
 class TestConfigurationFile(unittest.TestCase):

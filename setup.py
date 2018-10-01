@@ -67,7 +67,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        'benchmark': ['config/benchmark.conf.default']
+        'genomics_benchmarks': ['config/benchmark.conf.default']
     },
     classifiers=CLASSIFIERS,
     install_requires=[
@@ -84,7 +84,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'genomics-benchmarks = benchmark:main'
+            'genomics-benchmarks = genomics_benchmarks:main'
         ]
     }
 )

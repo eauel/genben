@@ -6,7 +6,7 @@
 import unittest
 import sys
 from unittest.mock import patch
-from benchmark import cli
+from genomics_benchmarks import cli
 
 class TestCommandLineInterface(unittest.TestCase):
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from benchmark import cli
+import benchmark
 
 if __name__ == "__main__":
-    cli.main()
+    benchmark.main()

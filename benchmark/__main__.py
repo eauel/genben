@@ -1,13 +1,4 @@
-from benchmark import cli
-import sys
-
-
-def main():
-    try:
-        cli._main()
-    except KeyboardInterrupt:
-        print("Program interrupted. Exiting...")
-        sys.exit(1)
+import benchmark
 
 if __name__ == '__main__':
-    main()
+    benchmark.main()

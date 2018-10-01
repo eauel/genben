@@ -65,9 +65,10 @@ setup(
     license='MIT',
     author='ornl-oxford',
     packages=find_packages(),
-    data_files=[
-        ('doc', ['benchmark.conf.default'])
-    ],
+    include_package_data=True,
+    package_data={
+        'benchmark': ['config/benchmark.conf.default']
+    },
     classifiers=CLASSIFIERS,
     install_requires=[
         'matplotlib',
@@ -83,7 +84,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'genomics-benchmarks = benchmark.__main__:main'
+            'genomics-benchmarks = benchmark:main'
         ]
     }
 )

@@ -29,7 +29,10 @@ def create_directory_tree(path):
     :type path: str
     """
     path = str(path)  # Ensure path is in str format
-    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+    try:
+        pathlib.Path(path).mkdir(parents=True)
+    except OSError:  # Catch if directory already exists
+        pass
 
 
 def remove_directory_tree(path):

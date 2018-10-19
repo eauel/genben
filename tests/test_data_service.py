@@ -106,7 +106,7 @@ class TestDataServices(unittest.TestCase):
             shutil.rmtree(process_data_files_test_dir)
 
         # Create input directory
-        pathlib.Path(input_dir_test).mkdir(parents=True, exist_ok=True)
+        data_service.create_directory_tree(input_dir_test)
 
         # Copy test files into input directory to test data processing
         for test_file in test_files_input:

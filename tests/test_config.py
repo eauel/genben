@@ -5,7 +5,11 @@
 """
 
 import unittest
-from unittest.mock import patch
+
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 import sys
 import os
 from genomics_benchmarks import cli, config
@@ -35,10 +39,10 @@ class TestConfigurationFile(unittest.TestCase):
 
         if os.path.isfile(location) and os.path.isfile(location_expected):
             # Read generated config file contents
-            with open(file=location) as file:
+            with open(location) as file:
                 data_generated = file.readlines()
 
-            with open(file=location_expected) as file:
+            with open(location_expected) as file:
                 data_expected = file.readlines()
 
             # Check contents of default config file
@@ -71,10 +75,10 @@ class TestConfigurationFile(unittest.TestCase):
 
         if os.path.isfile(location) and os.path.isfile(location_default):
             # Read generated config file contents
-            with open(file=location) as file:
+            with open(location) as file:
                 data_generated = file.readlines()
 
-            with open(file=location_default) as file:
+            with open(location_default) as file:
                 data_default = file.readlines()
 
             # Check contents of default config file
@@ -108,11 +112,11 @@ class TestConfigurationFile(unittest.TestCase):
 
         if os.path.isfile(location) and os.path.isfile(location_expected):
             # Read generated config file contents
-            with open(file=location) as file:
+            with open(location) as file:
                 data_generated = file.readlines()
 
             # Read default config file contents
-            with open(file=location_expected) as file:
+            with open(location_expected) as file:
                 data_expected = file.readlines()
 
             # Check contents of default config file

@@ -2,7 +2,7 @@ from configparser import ConfigParser
 from shutil import copyfile
 import os.path
 from pkg_resources import resource_string
-from numcodecs import Blosc
+from numcodecs.blosc import Blosc
 
 
 def config_str_to_bool(input_str):

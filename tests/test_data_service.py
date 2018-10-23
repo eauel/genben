@@ -7,7 +7,6 @@ import os.path
 import shutil
 import zarr
 import numpy as np
-import pathlib
 
 from genomics_benchmarks import data_service, config
 

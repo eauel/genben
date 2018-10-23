@@ -12,3 +12,5 @@ zarr
 scikit-allel
 perf
 tox
+mock ; python_version == '2.7'
+pathlib ; python_version == '2.7'

@@ -126,7 +126,6 @@ class VCFtoZarrConfigurationRepresentation:
                         pass
 
 
-
 def read_configuration(location):
     """
     Args: location of the configuration file, existing configuration dictionary

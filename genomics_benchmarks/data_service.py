@@ -22,7 +22,7 @@ import functools
 import numpy as np
 import zarr
 import numcodecs
-from numcodecs.blosc import Blosc
+from numcodecs import Blosc
 from genomics_benchmarks import config
 
 import gzip

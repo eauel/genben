@@ -116,7 +116,7 @@ if __name__ == '__main__':
         for key, value in params.items():
             merged_config['benchmark'][key] = value
 
-        with tempfile.TemporaryFile(mode='w', delete=False) as merged_config_file:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as merged_config_file:
             print(merged_config_file.name)
             merged_config.write(merged_config_file)  # Write merged config data to temporary file
             merged_config_file.flush()

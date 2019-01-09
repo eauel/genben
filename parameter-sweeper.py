@@ -54,6 +54,8 @@ if __name__ == '__main__':
                         help='Specifies the location for the base configuration file.')
     parser.add_argument('--sweep_config', type=str, required=True,
                         help='Specifies the location for all parameters to sweep through.')
+    parser.add_argument('--section_name', type=str, required=True,
+                        help='Specifies the [section] to use within the parameter sweep configuration file.')
 
     runtime_config = vars(parser.parse_args())
 
@@ -77,10 +79,11 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # Extract and display all parameters to sweep through
+    sweep_section_name = runtime_config['section_name']
     sweep_params = {}
-    print('Parameters to sweep through: ')
+    print('Parameters to sweep through within section [{}]: '.format(sweep_section_name))
     for section in sweep_config:
-        if section == 'benchmark':
+        if section == sweep_section_name:
             print('[{}]'.format(section))
             for key in sweep_config[section]:
                 # Extract all parameters for the specified key
@@ -109,12 +112,12 @@ if __name__ == '__main__':
         merged_config = configparser.ConfigParser()
         merged_config.read_dict(base_config_dict)  # Read in base config parameters
 
-        if 'benchmark' not in merged_config.sections():
-            merged_config['benchmark'] = {}
+        if sweep_section_name not in merged_config.sections():
+            merged_config[sweep_section_name] = {}
 
         # Merge sweep params
         for key, value in params.items():
-            merged_config['benchmark'][key] = value
+            merged_config[sweep_section_name][key] = value
 
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as merged_config_file:
             print(merged_config_file.name)

@@ -431,7 +431,6 @@ class Benchmark:
         pca_num_components = self.bench_conf.pca_number_components
         scaler = self.bench_conf.pca_data_scaler
 
-        """
         if self.bench_conf.genotype_array_type == config.GENOTYPE_ARRAY_DASK:
             # Rechunk Dask array to work with Dask's svd function (single chunk for transposed column)
             gnu_pca_conv = gnu.rechunk({0: -1, 1: gt.values.chunksize[1]})
@@ -446,7 +445,6 @@ class Benchmark:
             coords.compute()
         self.benchmark_profiler.end_benchmark()
         del gnu_pca_conv, coords, model
-        """
 
         if self.bench_conf.genotype_array_type == config.GENOTYPE_ARRAY_DASK:
             # Rechunk Dask array to match original genotype chunk size

@@ -5,7 +5,6 @@ runs the benchmarks, and records the timer results. """
 import allel
 import zarr
 import datetime
-import time  # for benchmark timer
 import numpy as np
 import dask.array as da
 import os
@@ -370,24 +369,6 @@ class Benchmark:
         ac = gt.count_alleles()
         self.benchmark_profiler.end_benchmark()
 
-        # Count number of multiallelic SNPs
-        self.benchmark_profiler.start_benchmark('PCA: Count multiallelic SNPs')
-        if self.bench_conf.genotype_array_type == config.GENOTYPE_ARRAY_DASK:
-            num_multiallelic_snps = da.count_nonzero(ac.max_allele() > 1).compute()
-        else:
-            num_multiallelic_snps = np.count_nonzero(ac.max_allele() > 1)
-        self.benchmark_profiler.end_benchmark()
-        del num_multiallelic_snps
-
-        # Count number of biallelic singletons
-        self.benchmark_profiler.start_benchmark('PCA: Count biallelic singletons')
-        if self.bench_conf.genotype_array_type == config.GENOTYPE_ARRAY_DASK:
-            num_biallelic_singletons = da.count_nonzero((ac.max_allele() == 1) & ac.is_singleton(1)).compute()
-        else:
-            num_biallelic_singletons = np.count_nonzero((ac.max_allele() == 1) & ac.is_singleton(1))
-        self.benchmark_profiler.end_benchmark()
-        del num_biallelic_singletons
-
         # Apply filtering to remove singletons and multiallelic SNPs
         flt = (ac.max_allele() == 1) & (ac[:, :2].min(axis=1) > 1)
         flt_count = np.count_nonzero(flt)
@@ -450,6 +431,7 @@ class Benchmark:
         pca_num_components = self.bench_conf.pca_number_components
         scaler = self.bench_conf.pca_data_scaler
 
+        """
         if self.bench_conf.genotype_array_type == config.GENOTYPE_ARRAY_DASK:
             # Rechunk Dask array to work with Dask's svd function (single chunk for transposed column)
             gnu_pca_conv = gnu.rechunk({0: -1, 1: gt.values.chunksize[1]})
@@ -464,6 +446,7 @@ class Benchmark:
             coords.compute()
         self.benchmark_profiler.end_benchmark()
         del gnu_pca_conv, coords, model
+        """
 
         if self.bench_conf.genotype_array_type == config.GENOTYPE_ARRAY_DASK:
             # Rechunk Dask array to match original genotype chunk size

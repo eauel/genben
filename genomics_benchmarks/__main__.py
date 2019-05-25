@@ -1,7 +1,4 @@
-from dask_mpi import initialize
-initialize(interface='ib0')
+import genomics_benchmarks
 
 if __name__ == '__main__':
-    import genomics_benchmarks
-
     genomics_benchmarks.main()

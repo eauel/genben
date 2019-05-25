@@ -9,5 +9,4 @@ class DaskUtils:
         # Connect to Dask scheduler
         print('[Dask Utils] Connecting to Dask scheduler at {address}:{port}'.format(address=address, port=port))
         # self.client = Client('{}:{}'.format(address, port))
-        # self.client = Client(scheduler_file='scheduler.json')
-        self.client = Client()
+        self.client = Client(scheduler_file='scheduler.json')

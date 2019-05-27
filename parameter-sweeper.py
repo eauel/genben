@@ -124,10 +124,6 @@ if __name__ == '__main__':
             merged_config_file.close()
             os.remove(merged_config_file.name)
 
-            # Add current parameter set to resulting PSV file
-            benchmark_result_name = '{}.psv'.format(benchmark_label)
-            add_parameters_to_psv(benchmark_result_name, params)
-
         counter += 1
 
     print('Finished. Exiting...')

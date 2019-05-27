@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+from dask_mpi import initialize
+
+initialize()
+
+from dask.distributed import Client
+
+client = Client()  # Connect this local process to remote workers
+
 try:
     from unittest.mock import patch
 except ImportError:
@@ -10,7 +18,6 @@ import argparse  # for command line parsing
 import configparser  # for configuration file parsing
 import itertools  # for iterating through each possible config combination
 import tempfile  # For writing configuration files for each benchmark
-import pandas as pd
 
 import genomics_benchmarks
 
@@ -26,25 +33,6 @@ def configparser_to_dict(config):
         for key, value in config[section].items():
             dict[section][key] = value
     return dict
-
-
-def add_parameters_to_psv(psv_location, params):
-    if not os.path.exists(psv_location):
-        print('Error: Resulting PSV file could not be found. Cannot insert parameters.')
-        return
-
-    # Read results PSV from file
-    df = pd.read_csv(psv_location, delimiter='|')
-
-    # Add the params to each entry
-    for column_name, value in params.items():
-        if column_name in df.columns:
-            df[column_name] = df[column_name].fillna(value)
-        else:
-            df[column_name] = value
-
-            # Write the data back to file
-    df.to_csv(psv_location, sep="|", index=False)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 
 from dask_mpi import initialize
 
-initialize()
+initialize(interface='ib0')
 
 from dask.distributed import Client
 

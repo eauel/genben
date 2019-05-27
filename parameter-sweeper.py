@@ -2,7 +2,7 @@
 
 from dask_mpi import initialize
 
-initialize(interface='ib0', nthreads=16)
+initialize(interface='ib0', nthreads=32)
 
 from dask.distributed import Client
 

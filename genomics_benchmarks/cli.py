@@ -70,7 +70,7 @@ def _main():
 
         # Clear out existing files in VCF and Zarr directories
         data_service.remove_directory_tree(data_dirs.vcf_dir)
-        data_service.remove_directory_tree(data_dirs.zarr_dir_setup)
+        # data_service.remove_directory_tree(data_dirs.zarr_dir_setup)
 
         # Get runtime config from specified location
         runtime_config = config.read_configuration(location=cli_arguments["config_file"])

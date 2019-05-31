@@ -44,6 +44,7 @@ if __name__ == '__main__':
                         help='Specifies the location for all parameters to sweep through.')
     parser.add_argument('--section_name', type=str, required=True,
                         help='Specifies the [section] to use within the parameter sweep configuration file.')
+    parser.add_argument('--label', type=str, required=False)
 
     runtime_config = vars(parser.parse_args())
 
@@ -113,7 +114,11 @@ if __name__ == '__main__':
             merged_config_file.flush()
 
             # Run genomics-benchmarks
-            benchmark_label = 'parametersweep_results'
+            if 'label' in runtime_config:
+                benchmark_label = runtime_config['label']
+            else:
+                benchmark_label = 'parametersweep_results'
+
             benchmark_args = ['genomics-benchmarks', 'exec',
                               '--config_file', merged_config_file.name,
                               '--label', benchmark_label]

@@ -53,6 +53,9 @@ class ConfigurationRepresentation(object):
             dict_section = {name: dict(parser.items(name))}  # create dictionary representation for section
             self.__dict__.update(dict_section)  # add section dictionary to root dictionary
 
+    def __getitem__(self, item):
+        return self.__dict__[item]
+
 
 class FTPConfigurationRepresentation(object):
     """ Utility class for object representation of FTP module configuration. """
@@ -193,6 +196,36 @@ class VCFtoZarrConfigurationRepresentation:
                                         "blosc_shuffle_mode could not be converted to integer.")
 
 
+class DaskSchedulerConfigurationRepresentation:
+    """ Utility class for object representation of the Dask scheduler module configuration. """
+    enabled = False  # Specifies whether connection to a Dask scheduler should be performed or not
+    scheduler_address = '127.0.0.1'
+    scheduler_port = 8786
+
+    def __init__(self, runtime_config=None):
+        """
+        Creates an object representation of Dask scheduler module configuration data.
+        :param runtime_config: runtime_config data to extract Dask scheduler configuration from
+        :type runtime_config: ConfigurationRepresentation
+        """
+        if runtime_config is not None:
+            # Check if [vcf_to_zarr] section exists in config
+            if hasattr(runtime_config, "dask"):
+                # Extract relevant settings from config file
+                config_dask = runtime_config['dask']
+                if "enabled" in config_dask:
+                    self.enabled = config_str_to_bool(config_dask["enabled"])
+                if 'scheduler_address' in config_dask:
+                    self.scheduler_address = config_dask['scheduler_address']
+                if "scheduler_port" in config_dask:
+                    scheduler_port_str = config_dask["scheduler_port"]
+                    if isint(scheduler_port_str) and int(scheduler_port_str) > 0:
+                        self.scheduler_port = int(scheduler_port_str)
+                    else:
+                        raise ValueError("Invalid value provided for scheduler port in configuration.\n"
+                                         "Expected: positive integer value")
+
+
 benchmark_data_input_types = ["vcf", "zarr"]
 
 PCA_DATA_SCALER_STANDARD = 0
@@ -205,9 +238,9 @@ benchmark_pca_data_scaler_types = {PCA_DATA_SCALER_STANDARD: 'standard',
 GENOTYPE_ARRAY_NORMAL = 0
 GENOTYPE_ARRAY_DASK = 1
 GENOTYPE_ARRAY_CHUNKED = 2
-benchmark_pca_genotype_array_types = {GENOTYPE_ARRAY_NORMAL,
-                                      GENOTYPE_ARRAY_DASK,
-                                      GENOTYPE_ARRAY_CHUNKED}
+genotype_array_types = {GENOTYPE_ARRAY_NORMAL,
+                        GENOTYPE_ARRAY_DASK,
+                        GENOTYPE_ARRAY_CHUNKED}
 
 
 class BenchmarkConfigurationRepresentation:
@@ -215,15 +248,21 @@ class BenchmarkConfigurationRepresentation:
     benchmark_number_runs = 5
     benchmark_data_input = "vcf"
     benchmark_dataset = ""
+    benchmark_num_variants = -1
+    benchmark_num_samples = -1
     benchmark_aggregations = False
     benchmark_pca = False
+    genotype_array_type = GENOTYPE_ARRAY_DASK
+    dask_genotype_array_chunk_variants = -1
+    dask_genotype_array_chunk_samples = -1
     vcf_to_zarr_config = None
+    results_output_config = None
 
     # PCA-specific settings
     pca_number_components = 10
     pca_data_scaler = benchmark_pca_data_scaler_types[PCA_DATA_SCALER_PATTERSON]
-    pca_genotype_array_type = GENOTYPE_ARRAY_DASK
     pca_subset_size = 100000
+    pca_ld_enabled = False
     pca_ld_pruning_number_iterations = 2
     pca_ld_pruning_size = 100
     pca_ld_pruning_step = 20
@@ -249,10 +288,64 @@ class BenchmarkConfigurationRepresentation:
                         self.benchmark_data_input = benchmark_data_input_temp
                 if "benchmark_dataset" in runtime_config.benchmark:
                     self.benchmark_dataset = runtime_config.benchmark["benchmark_dataset"]
+                if "benchmark_num_variants" in runtime_config.benchmark:
+                    benchmark_num_variants_str = runtime_config.benchmark["benchmark_num_variants"]
+                    if isint(benchmark_num_variants_str) and (
+                            int(benchmark_num_variants_str) == -1 or int(benchmark_num_variants_str) >= 1):
+                        self.benchmark_num_variants = int(benchmark_num_variants_str)
+                    else:
+                        raise ValueError("Invalid value for benchmark_num_variants in configuration.\n"
+                                         "benchmark_num_variants must be a valid integer greater than 1.\n"
+                                         "Alternatively, a value of -1 can be specified to include all variants.")
+                if "benchmark_num_samples" in runtime_config.benchmark:
+                    benchmark_num_samples_str = runtime_config.benchmark["benchmark_num_samples"]
+                    if isint(benchmark_num_samples_str) and (
+                            int(benchmark_num_samples_str) == -1 or int(benchmark_num_samples_str) >= 1):
+                        self.benchmark_num_samples = int(benchmark_num_samples_str)
+                    else:
+                        raise ValueError("Invalid value for benchmark_num_samples in configuration.\n"
+                                         "benchmark_num_samples must be a valid integer greater than 1.\n"
+                                         "Alternatively, a value of -1 can be specified to include all samples.")
                 if "benchmark_aggregations" in runtime_config.benchmark:
                     self.benchmark_aggregations = config_str_to_bool(runtime_config.benchmark["benchmark_aggregations"])
                 if "benchmark_pca" in runtime_config.benchmark:
                     self.benchmark_pca = config_str_to_bool(runtime_config.benchmark["benchmark_pca"])
+                if "genotype_array_type" in runtime_config.benchmark:
+                    genotype_array_type_str = runtime_config.benchmark["genotype_array_type"]
+                    if isint(genotype_array_type_str) and (
+                            int(genotype_array_type_str) in genotype_array_types):
+                        self.genotype_array_type = int(genotype_array_type_str)
+                    else:
+                        raise ValueError("Invalid value for genotype_array_type in configuration.\n"
+                                         "genotype_array_type must be a valid integer between 0 and 2")
+                if "dask_genotype_array_chunk_variants" in runtime_config.benchmark:
+                    dask_genotype_array_chunk_variants_str = runtime_config.benchmark["dask_genotype_array_chunk_variants"]
+                    if isint(dask_genotype_array_chunk_variants_str):
+                        if int(dask_genotype_array_chunk_variants_str) == -1 or int(
+                                dask_genotype_array_chunk_variants_str) > 0:
+                            self.dask_genotype_array_chunk_variants = int(dask_genotype_array_chunk_variants_str)
+                        else:
+                            raise ValueError("Invalid value for dask_genotype_array_chunk_variants in configuration.\n"
+                                             "dask_genotype_array_chunk_variants must be a valid integer equal to\n"
+                                             "-1 or an integer greater than 0.")
+                    else:
+                        raise TypeError("Invalid type for dask_genotype_array_chunk_variants in configuration.\n"
+                                        "dask_genotype_array_chunk_variants must be a valid integer equal to\n"
+                                        "-1 or an integer greater than 0.")
+                if "dask_genotype_array_chunk_samples" in runtime_config.benchmark:
+                    dask_genotype_array_chunk_samples_str = runtime_config.benchmark["dask_genotype_array_chunk_samples"]
+                    if isint(dask_genotype_array_chunk_samples_str):
+                        if int(dask_genotype_array_chunk_samples_str) == -1 or int(
+                                dask_genotype_array_chunk_samples_str) > 0:
+                            self.dask_genotype_array_chunk_samples = int(dask_genotype_array_chunk_samples_str)
+                        else:
+                            raise ValueError("Invalid value for dask_genotype_array_chunk_samples in configuration.\n"
+                                             "dask_genotype_array_chunk_samples must be a valid integer equal to\n"
+                                             "-1 or an integer greater than 0.")
+                    else:
+                        raise TypeError("Invalid type for dask_genotype_array_chunk_samples in configuration.\n"
+                                        "dask_genotype_array_chunk_samples must be a valid integer equal to\n"
+                                        "-1 or an integer greater than 0.")
                 if "pca_number_components" in runtime_config.benchmark:
                     pca_number_components_str = runtime_config.benchmark["pca_number_components"]
                     if isint(pca_number_components_str) and (int(pca_number_components_str) > 0):
@@ -267,21 +360,18 @@ class BenchmarkConfigurationRepresentation:
                     else:
                         raise ValueError("Invalid value for pca_data_scaler in configuration.\n"
                                          "pca_data_scaler must be a valid integer between 0 and 2")
-                if "pca_genotype_array_type" in runtime_config.benchmark:
-                    pca_genotype_array_type_str = runtime_config.benchmark["pca_genotype_array_type"]
-                    if isint(pca_genotype_array_type_str) and (
-                            int(pca_genotype_array_type_str) in benchmark_pca_genotype_array_types):
-                        self.pca_genotype_array_type = int(pca_genotype_array_type_str)
-                    else:
-                        raise ValueError("Invalid value for pca_genotype_array_type in configuration.\n"
-                                         "pca_genotype_array_type must be a valid integer between 0 and 2")
                 if "pca_subset_size" in runtime_config.benchmark:
                     pca_subset_size_str = runtime_config.benchmark["pca_subset_size"]
                     if isint(pca_subset_size_str) and (int(pca_subset_size_str) > 0):
                         self.pca_subset_size = int(pca_subset_size_str)
+                    elif isint(pca_subset_size_str) and (int(pca_subset_size_str) == -1):
+                        self.pca_subset_size = int(pca_subset_size_str)
                     else:
                         raise ValueError("Invalid value for pca_subset_size in configuration.\n"
-                                         "pca_subset_size must be a valid integer greater than 0.")
+                                         "pca_subset_size must be a valid integer greater than 0.\n"
+                                         "Additionally, a value of -1 can be used to include all samples.")
+                if "pca_ld_enabled" in runtime_config.benchmark:
+                    self.pca_ld_enabled = config_str_to_bool(runtime_config.benchmark["pca_ld_enabled"])
                 if "pca_ld_pruning_number_iterations" in runtime_config.benchmark:
                     pca_ld_pruning_number_iterations_str = runtime_config.benchmark["pca_ld_pruning_number_iterations"]
                     if isint(pca_ld_pruning_number_iterations_str) and (int(pca_ld_pruning_number_iterations_str) > 0):
@@ -313,6 +403,66 @@ class BenchmarkConfigurationRepresentation:
 
             # Add the VCF to Zarr Conversion Configuration Data
             self.vcf_to_zarr_config = VCFtoZarrConfigurationRepresentation(runtime_config=runtime_config)
+
+            # Add the Output Results Configuration Data
+            self.results_output_config = OutputConfigurationRepresentation(runtime_config=runtime_config)
+
+
+class OutputConfigurationRepresentation:
+    """ Utility class for object representation of the benchmark results output module's configuration. """
+    output_csv_enabled = True
+    output_csv_delimiter = '|'
+
+    output_influxdb_enabled = False
+    output_influxdb_host = 'localhost'
+    output_influxdb_port = 8086
+    output_influxdb_username = 'root'
+    output_influxdb_password = 'root'
+    output_influxdb_database_name = 'benchmark'
+    output_influxdb_benchmark_group = ''
+    output_influxdb_device_name = ''
+
+    def __init__(self, runtime_config=None):
+        """
+        Creates an object representation of the results output module's configuration data.
+        :param runtime_config: runtime_config data to extract output configuration from
+        :type runtime_config: ConfigurationRepresentation
+        """
+        if runtime_config is not None:
+            # Check if settings exist for [output.csv] module
+            if hasattr(runtime_config, 'output.csv'):
+                # Extract relevant settings from config file
+                config_output_csv = runtime_config['output.csv']
+                if 'enabled' in config_output_csv:
+                    self.output_csv_enabled = config_str_to_bool(config_output_csv['enabled'])
+                if 'delimiter' in config_output_csv:
+                    self.output_csv_delimiter = config_output_csv['delimiter']
+
+            # Check if settings exist for [output.csv] module
+            if hasattr(runtime_config, 'output.influxdb'):
+                # Extract relevant settings from config file
+                config_output_influxdb = runtime_config['output.influxdb']
+                if 'enabled' in config_output_influxdb:
+                    self.output_influxdb_enabled = config_str_to_bool(config_output_influxdb['enabled'])
+                if 'host' in config_output_influxdb:
+                    self.output_influxdb_host = config_output_influxdb['host']
+                if 'port' in config_output_influxdb:
+                    config_output_influxdb_port_str = config_output_influxdb['port']
+                    if isint(config_output_influxdb_port_str):
+                        self.output_influxdb_port = int(config_output_influxdb_port_str)
+                    else:
+                        raise ValueError("Invalid value for port in [output.influxdb] configuration.\n"
+                                         "port must be a valid integer.")
+                if 'username' in config_output_influxdb:
+                    self.output_influxdb_username = config_output_influxdb['username']
+                if 'password' in config_output_influxdb:
+                    self.output_influxdb_password = config_output_influxdb['password']
+                if 'database_name' in config_output_influxdb:
+                    self.output_influxdb_database_name = config_output_influxdb['database_name']
+                if 'benchmark_group' in config_output_influxdb:
+                    self.output_influxdb_benchmark_group = config_output_influxdb['benchmark_group']
+                if 'device_name' in config_output_influxdb:
+                    self.output_influxdb_device_name = config_output_influxdb['device_name']
 
 
 def read_configuration(location):

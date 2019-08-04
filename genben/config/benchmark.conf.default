@@ -75,6 +75,17 @@ blosc_compression_level = 1
 #   - AUTOSHUFFLE:  -1
 blosc_shuffle_mode = -1
 
+
+[dask]
+
+# Enables/disables connection to a Dask distributed scheduler.
+enabled = False
+
+# The IP address and port of the scheduler to connect to.
+scheduler_address = 127.0.0.1
+scheduler_port = 8786
+
+
 [benchmark]
 
 # Specifies how many times the benchmark tool should run
@@ -92,14 +103,41 @@ benchmark_number_runs = 5
 benchmark_data_input = vcf
 
 # Specifies which dataset to use for the benchmarking process.
+# If a value * is specified, the benchmark will concatenate all data in the ./data/zarr/ directory.
+#   - Note: In order to use concatenation, all data sets must have the same number of samples to align properly.
+#   - Note: Concatenation (*) can only be used when benchmark_data_input is set to zarr.
 benchmark_dataset =
+
+# Specifies the number of variants to include from the dataset input for benchmarking.
+# If a value of -1 is passed, then all variants will be included.
+benchmark_num_variants = -1
+
+# Specifies the number of samples to include from the dataset input for benchmarking.
+# If a value of -1 is passed, then all samples will be included.
+benchmark_num_samples = -1
+
 
 # Enables/disables running simple aggregations, such as allele count and genotype count, 
 # as part of the benchmarking process.
 benchmark_aggregations = True
 
 # Enables Principal Component Analysis (PCA) as part of the benchmarking process.
-benchmark_pca = False
+benchmark_pca = True
+
+# Specifies the type of data array to use when loading the genotype data for benchmarking.
+# Possible Values:
+#   - Normal:   0
+#   - Dask:     1
+#   - Chunked:  2
+genotype_array_type = 1
+
+# [Dask] Specifies the chunk length and width to use when creating a Dask genotype array.
+# Chunk variants corresponds to length, and chunk samples corresponds to width.
+# These parameters are only used if genotype_array_type is set to use Dask array.
+# If a value of -1 is passed, it will inherit the underlying Zarr dataset chunk size.
+# If a value of -1 is passed for both parameters, no re-chunking will occur.
+dask_genotype_array_chunk_variants = -1
+dask_genotype_array_chunk_samples = -1
 
 # [PCA Benchmark] Specifies the number of principal components to keep when performing PCA analysis.
 pca_number_components = 10
@@ -111,16 +149,14 @@ pca_number_components = 10
 #   - None:         2
 pca_data_scaler = 1
 
-# [PCA Benchmark] Specifies the type of data array to use when loading the genotype data.
-# Possible Values:
-#   - Normal:   0
-#   - Dask:     1
-#   - Chunked:  2
-pca_genotype_array_type = 2
-
 # [PCA Benchmark] Sets the number of SNPs to use as a subset of the data set.
 # If the size of the data set is smaller than pca_subset_size, that will be used instead.
-pca_subset_size = 100000
+# Additionally, a value of -1 can be passed to include everything (no random subset will be taken).
+pca_subset_size = -1
+
+# [PCA Benchmark: Linkage Disequilibrium] Specifies whether to enable or disable LD pruning operation.
+# Note: The LD pruning implementation is not parallelized and may not scale well when running on multi-node systems.
+pca_ld_enabled = False
 
 # [PCA Benchmark: Linkage Disequilibrium] Sets the number of iterations to perform LD pruning.
 pca_ld_pruning_number_iterations = 2
@@ -133,3 +169,34 @@ pca_ld_pruning_step = 20
 
 # [PCA Benchmark: Linkage Disequilibrium] Sets the maximum value of r^2 to include variants.
 pca_ld_pruning_threshold = 0.01
+
+
+[output.csv]
+# Specifies whether to enable/disable benchmark results output to CSV-style file.
+enabled = True
+
+# Specifies which delimiter to use to separate fields within each row of data
+delimiter = |
+
+
+[output.influxdb]
+# Specifies whether to enable/disable benchmark results output to a InfluxDB server
+enabled = False
+
+# Host/IP address and port of the machine running InfluxDB
+host = localhost
+port = 8086
+
+# Username and password credentials to login to InfluxDB instance
+username = root
+password = root
+
+# Name of database to store benchmark results
+database_name = benchmark
+
+# (Optional) Tag that can be used to group/organize different benchmark results
+benchmark_group =
+
+# (Optional) Tag that can be used to specify which machine is running the benchmark.
+# This option can be useful for matching benchmark results when pushing data from multiple machines.
+device_name =

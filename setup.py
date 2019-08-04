@@ -48,25 +48,27 @@ CLASSIFIERS = [
     'Natural Language :: English',
     'Operating System :: OS Independent',
     'Environment :: Console',
-    'Programming Language :: Python :: 3',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
 ]
 
 with open('README.rst', 'r') as f:
     long_description = f.read()
 
 setup(
-    name='genomics-benchmarks',
+    name='genben',
     version=VERSION,
     description=DESCRIPTION,
     long_description=long_description,
-    url='https://github.com/ornl-oxford/genomics-benchmarks/',
+    url='https://github.com/ornl-oxford/genben/',
     license='MIT',
     author='ornl-oxford',
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        'genomics_benchmarks': ['config/benchmark.conf.default']
+        'genben': ['config/benchmark.conf.default']
     },
     classifiers=CLASSIFIERS,
     install_requires=[
@@ -75,18 +77,20 @@ setup(
         'pandas',
         'scipy',
         'dask',
+        'distributed',
         'numcodecs',
         'zarr',
         'scikit-learn',
         'scikit-allel',
-        'perf',
+        'pyperf',
         'toolz',
+        'influxdb',
         'mock;python_version=="2.7"',
         'pathlib;python_version=="2.7"'
     ],
     entry_points={
         'console_scripts': [
-            'genomics-benchmarks = genomics_benchmarks:main'
+            'genben = genben:main'
         ]
     }
 )

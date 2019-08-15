@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
 
-from dask_mpi import initialize
-
-initialize(interface='ib0', nthreads=32)
-
-from dask.distributed import Client
-
-client = Client(scheduler_file="scheduler.json")  # Connect this local process to remote workers
-
 try:
     from unittest.mock import patch
 except ImportError:
@@ -19,7 +11,7 @@ import configparser  # for configuration file parsing
 import itertools  # for iterating through each possible config combination
 import tempfile  # For writing configuration files for each benchmark
 
-import genomics_benchmarks
+import genben
 
 
 def product_params(inp):
@@ -37,7 +29,7 @@ def configparser_to_dict(config):
 
 if __name__ == '__main__':
     # Extract arguments from CLI
-    parser = argparse.ArgumentParser(description='A parameter sweeper for genomics-benchmarks exec mode.')
+    parser = argparse.ArgumentParser(description='A parameter sweeper for genben exec mode.')
     parser.add_argument('--base_config', type=str, required=True,
                         help='Specifies the location for the base configuration file.')
     parser.add_argument('--sweep_config', type=str, required=True,
@@ -92,7 +84,7 @@ if __name__ == '__main__':
     benchmark_params_count = sum(1 for _ in benchmark_params_count)  # Get total number of parameter combinations
     print('Total number of benchmarks to run: {}'.format(benchmark_params_count))
 
-    # Create a merged config file and run genomics-benchmarks for each parameter sweep set
+    # Create a merged config file and run genben for each parameter sweep set
     counter = 0
     for params in benchmark_params:
         print('Running benchmark {}/{}'.format(counter + 1, benchmark_params_count))
@@ -113,17 +105,17 @@ if __name__ == '__main__':
             merged_config.write(merged_config_file)  # Write merged config data to temporary file
             merged_config_file.flush()
 
-            # Run genomics-benchmarks
+            # Run genben
             if 'label' in runtime_config:
                 benchmark_label = runtime_config['label']
             else:
                 benchmark_label = 'parametersweep_results'
 
-            benchmark_args = ['genomics-benchmarks', 'exec',
+            benchmark_args = ['genben', 'exec',
                               '--config_file', merged_config_file.name,
                               '--label', benchmark_label]
             with patch.object(sys, 'argv', benchmark_args):
-                genomics_benchmarks.main()
+                genben.main()
 
             # Close and remove the temporary configuration file
             merged_config_file.close()

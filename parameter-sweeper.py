@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+from dask_mpi import initialize
+
+initialize(interface='ib0', nthreads=32)
+
+from dask.distributed import Client
+
+client = Client(scheduler_file='scheduler.json')  # Connect this local process to remote workers
+
 try:
     from unittest.mock import patch
 except ImportError:

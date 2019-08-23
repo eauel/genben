@@ -36,7 +36,7 @@ if __name__ == '__main__':
                         help='Specifies the location for all parameters to sweep through.')
     parser.add_argument('--section_name', type=str, required=True,
                         help='Specifies the [section] to use within the parameter sweep configuration file.')
-    parser.add_argument('--label', type=str, required=False)
+    parser.add_argument('--label', type=str, required=False, default='ps')
 
     runtime_config = vars(parser.parse_args())
 
@@ -106,10 +106,13 @@ if __name__ == '__main__':
             merged_config_file.flush()
 
             # Run genben
-            if 'label' in runtime_config:
-                benchmark_label = runtime_config['label']
-            else:
-                benchmark_label = 'parametersweep_results'
+            benchmark_label = runtime_config['label']
+
+            # Attempt to generate a label automatically
+            if 'benchmark_num_variants' in params:
+                benchmark_label += '_v{}'.format(params['benchmark_num_variants'])
+            if 'benchmark_num_samples' in params:
+                benchmark_label += '_s{}'.format(params['benchmark_num_samples'])
 
             benchmark_args = ['genben', 'exec',
                               '--config_file', merged_config_file.name,

@@ -111,8 +111,8 @@ def _main():
         dask_config = config.DaskSchedulerConfigurationRepresentation(runtime_config)
 
         # Connect to Dask scheduler if enabled
+        du = dask_utils.DaskUtils()
         if dask_config.enabled:
-            du = dask_utils.DaskUtils()
             du.connect_to_scheduler(address=dask_config.scheduler_address,
                                     port=dask_config.scheduler_port)
 
@@ -120,7 +120,10 @@ def _main():
         benchmark_config = config.BenchmarkConfigurationRepresentation(runtime_config)
 
         # Setup the benchmark runner
-        benchmark = core.Benchmark(bench_conf=benchmark_config, data_dirs=data_dirs, benchmark_label=benchmark_label)
+        benchmark = core.Benchmark(bench_conf=benchmark_config,
+                                   data_dirs=data_dirs,
+                                   benchmark_label=benchmark_label,
+                                   dask_client=du.client)
 
         # Run the benchmark
         benchmark.run_benchmark()

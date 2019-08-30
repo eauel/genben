@@ -139,7 +139,7 @@ class Benchmark:
     benchmark_zarr_dir = ""  # Directory for which to use data from for benchmark process
     benchmark_zarr_file = ""  # File within benchmark_zarr_dir for which to use for benchmark process
 
-    def __init__(self, bench_conf, data_dirs, benchmark_label):
+    def __init__(self, bench_conf, data_dirs, benchmark_label, dask_client=None):
         """
         Sets up a Benchmark object which is used to execute benchmarks.
         :param bench_conf: Benchmark configuration data that controls the benchmark execution
@@ -156,12 +156,17 @@ class Benchmark:
         self.benchmark_profiler = BenchmarkProfiler(output_config=self.bench_conf.results_output_config,
                                                     benchmark_label=self.benchmark_label)
 
+        self.dask_client = dask_client
+
     def run_benchmark(self):
         """
         Executes the benchmarking process.
         """
         if self.bench_conf is not None and self.data_dirs is not None:
             for run_number in range(1, self.bench_conf.benchmark_number_runs + 1):
+                if self.dask_client is not None:
+                    self.dask_client.restart()  # Restart all dask processes
+
                 # Clear out existing files in Zarr benchmark directory
                 # (Should be done every single run)
                 data_service.remove_directory_tree(self.data_dirs.zarr_dir_benchmark)

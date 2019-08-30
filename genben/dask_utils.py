@@ -9,5 +9,5 @@ class DaskUtils:
         # Connect to Dask scheduler
         print('[Dask Utils] Connecting to Dask scheduler at {address}:{port}'.format(address=address, port=port))
         self.client = Client('{}:{}'.format(address, port))
-        self.client.restart()
+        self.client.restart()  # Restart all dask processes
         # self.client = Client(scheduler_file='scheduler.json')
